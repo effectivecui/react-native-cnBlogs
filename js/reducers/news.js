@@ -1,15 +1,17 @@
 //@flow
 import { combineReducers } from 'redux';
-import type {ParseObject, Target} from '../actions/types';
+import {cancatArray} from '../store/util';
+import type {ParseObject} from '../actions/types';
+import {LOCAL_RECEIVE, LOCAL_REQUEST} from '../actions/local';
 import {NEWS_FETCH_POSTS_FAILURE,NEWS_FETCH_POSTS_REQUEST,NEWS_FETCH_POSTS_SUCCESS,
     NEWS_FETCH_CONTENT_FAILURE,NEWS_FETCH_CONTENT_REQUEST,NEWS_FETCH_CONTENT_SUCCESS} from '../actions/news';
 type State = ParseObject;
-type Action = {type: string, target: Target, requestedAt: number,
-     receivedAt: number, message: string,posts: ParseObject};
+type Action = {type: string, requestedAt: number, state: Object,
+     receivedAt: number, message: string,posts: ParseObject,pageindex: number,isFetching:boolean,didInvalidate:boolean};
 
 function posts(state: State = {}, action: Action): State{
     if(action.type==NEWS_FETCH_POSTS_SUCCESS){
-        return Object.assign({}, action.posts, state);
+        return Object.assign({}, state, action.posts);
     }else if(action.type==NEWS_FETCH_CONTENT_SUCCESS){
         return {
             ...state,
@@ -18,32 +20,10 @@ function posts(state: State = {}, action: Action): State{
                 content: action.posts.content
             }
         }
-    }
-    return state;
-}
-
-function recommend(state: State = {
-            isFetching: false,
-            didInvalidate: true,
-            lastRequested: null,
-            lastUpdated: null,
-            items: []}, action: Action): State{
-    if(action.type==NEWS_FETCH_POSTS_SUCCESS && action.target=="recommend"){
-        let items = [];
-        for(let Id in action.posts)items.push(Id);
+    }else if(action.type==LOCAL_RECEIVE){
         return {
-            ...state,
-            isFetching: false,
-            didInvalidate: false,
-            lastUpdated: action.receivedAt,
-            items: Object.assign({}, state.items, items)
-        }
-    }else if(action.type==NEWS_FETCH_POSTS_REQUEST && action.target=="recommend"){
-        return {
-            ...state,
-            isFetching: true,
-            didInvalidate: true,
-            lastRequested: action.requestedAt,
+            ...action.state.news.entities.posts,
+            ...state
         }
     }
     return state;
@@ -53,32 +33,36 @@ function recent(state: State = {
             isFetching: false,
             didInvalidate: true,
             lastRequested: null,
+            pageindex: 1,
             lastUpdated: null,
             items: []}, action: Action){
-    if(action.type==NEWS_FETCH_POSTS_SUCCESS && action.target=="recent"){
-        let items = [];
-        for(let Id in action.posts)items.push(Id);
-        let itemsJson = JSON.stringify(items)
-        state.items.forEach(function(Id){
-            if(!itemsJson[Id]){
-                items.push(Id);
-            }
-        })
-        //console.log("update state.....................................................................");
-        //console.log(items);
+    if(action.type==NEWS_FETCH_POSTS_SUCCESS){
+        let temp = [];
+        for(let Id in action.posts){
+            temp.push(Id);
+        }
         return {
             ...state,
             isFetching: false,
             didInvalidate: false,
+            pageindex: action.pageindex,
             lastUpdated: action.receivedAt,
-            items
+            items: cancatArray(state.items, temp)
         };
-    }else if(action.type==NEWS_FETCH_POSTS_REQUEST && action.target=="recent"){
+    }else if(action.type==NEWS_FETCH_POSTS_REQUEST){
         return {
             ...state,
-            isFetching: true,
-            didInvalidate: true,
+            isFetching: action.isFetching,
+            didInvalidate: action.didInvalidate,
             lastRequested: action.requestedAt
+        }
+    }else if(action.type==LOCAL_RECEIVE){
+        let temp = action.state.news.recent;
+        return {
+            ...state,
+            didInvalidate: false,
+            pageindex: temp.pageindex,
+            items: cancatArray(state.items, temp.items)
         }
     }
     return state;
@@ -104,7 +88,6 @@ const entities = combineReducers({
 });
 
 export const news = combineReducers({
-    entities,
-    recommend,
-    recent
+    recent,
+    entities
 });

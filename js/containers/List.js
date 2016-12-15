@@ -5,58 +5,129 @@ import {
   StyleSheet,
   Text,
   View,
-  ListView
+  ListView,
+  RefreshControl,
+  Dimensions
 } from 'react-native';
 import { connect } from 'react-redux';
-import {fetchNewsPosts} from '../actions/news';
-import {NewsRow} from '../components/NewsRow';
+import {fetchNewsPosts, fetchNewsContent} from '../actions/news';
+import {Row} from '../components/Row';
 import type { State, Dispatch } from '../actions/types';
-import type {News} from '../components/NewsRow';
-import {getRecentArray} from '../selectors';
-
+import type {News} from '../components/Row';
+import {recent} from '../selectors';
+import window from '../api/windows';
 const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-
-class List extends React.Component {
-  props: {
+const AVATAR_SIZE = 120;
+const ROW_HEIGHT = 60;
+const PARALLAX_HEADER_HEIGHT = 65;
+type Props = {
     isFetching: boolean,
     didInvalidate: boolean,
     lastRequested: number,
     lastUpdated: number,
     items: Array<News>,
-    onTouchRow: (rowData: Object)=>void,
-    onDidMount: ()=>void
+    pageindex: number,
+    onDidMount: ()=>void,
+    loadRowContent: (id: number)=>void,
+    fresh: ()=>void,
+    more: (pageindex: number)=>void,
+    navigator: Object
+  };
+class List extends React.Component {
+  
+  props: Props
+  constructor(props){
+    super(props);
+    (this: any).renderHeader = this.renderHeader.bind(this);
+    (this: any).renderFooter = this.renderFooter.bind(this);
   }
-
   componentDidMount(){
       this.props.onDidMount();
   }
-  
+  renderHeader(){
+      return (
+        <View style={styles.header}>
+          <Text style={styles.headertext}>新闻列表</Text>
+        </View>
+      );
+  }
+  renderFooter(){
+      return (
+        <View style={styles.footer}>
+          <Text style={styles.footertext} onPress={()=>{
+            this.props.more(this.props.pageindex-1)
+          }}>加载中...</Text>
+        </View>
+      );
+  }
   render() {
     if(this.props.didInvalidate)return <Text>Loading</Text>
     return (
       <ListView
+       enableEmptySections={true}
+       onEndReached={()=>this.props.more(this.props.pageindex)}
+       refreshControl={
+                  <RefreshControl
+                      refreshing={this.props.isFetching}
+                      onRefresh={this.props.fresh}
+                  />
+              }
         style={{flex: 1}}
         dataSource={ds.cloneWithRows(this.props.items)}
-        renderRow={(rowData)=><NewsRow rowData={rowData} onTouchRow={this.props.onTouchRow}/>}
+        renderFooter={this.renderFooter}
+        renderHeader={this.renderHeader}
+        renderRow={(rowData)=><Row rowData={rowData} onTouchRow={(rowData: News)=>{
+            this.props.navigator.push({newsid: rowData.id});
+        }}/>}
       />
     );
   }
 }
-
-function mapStateToProps(state: State){
+const styles = StyleSheet.create({
+  header: {
+    height: 65, 
+    alignItems: "center", 
+    justifyContent: "center", 
+    backgroundColor: `#5C5C5C`
+  },
+  headertext: {
+    fontSize: 20,
+    color: 'white',
+    marginHorizontal: 20, 
+    marginVertical: 5
+  },
+  footer: {
+    height: 40, 
+    alignItems: "center", 
+    justifyContent: "center", 
+    backgroundColor: `#5C5C5C`
+  },
+  footertext: {
+    color: 'white',
+    marginHorizontal: 20, 
+    marginVertical: 5
+  }
+})
+function mapStateToProps(state: State, props: Props){
   return {
     ...state.news.recent,
-    items: getRecentArray(state),
+    items: recent(state),
   }
 }
 
-function mapDispatchToProps(dispatch){
+function mapDispatchToProps(dispatch: Dispatch, props: Props){
   return {
-    onTouchRow: (rowData)=>{
-     
-    },
     onDidMount: ()=>{
-      dispatch(fetchNewsPosts("recent", 1, 10));
+      dispatch(fetchNewsPosts(1));
+    },
+    loadRowContent: (id: number)=>{
+      dispatch(fetchNewsContent(id));
+    },
+    fresh: ()=>{
+      dispatch(fetchNewsPosts(1, "fresh"));
+    },
+    more: (pageindex)=>{
+      dispatch(fetchNewsPosts(pageindex, "more"));
     }
   }
 }

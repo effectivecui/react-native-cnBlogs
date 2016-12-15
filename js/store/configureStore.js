@@ -14,7 +14,7 @@ const logger = createLogger({
 
 const store = createStore(
   reducers,
-  applyMiddleware(thunk, logger)
+  applyMiddleware(thunk)
 );
 
 function configureStore() {

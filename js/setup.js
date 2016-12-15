@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react';
 import { Provider } from 'react-redux'
-import {List} from './containers/List';
+import Navigation from './Navigation';
 import {configureStore} from './store/configureStore';
 
 export default class setup extends Component {
@@ -18,7 +18,7 @@ export default class setup extends Component {
   render() {
       return (
         <Provider store={this.state.store}>
-            <List />
+            <Navigation />
         </Provider>
       );
   }
