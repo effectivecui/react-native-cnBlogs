@@ -64,7 +64,7 @@ class Navigation extends Component{
             return (
                 <View style={{flex: 1}}>
                     <StatusBar hidden={true} />
-                    <NewsContent newsid={route.newsid} />
+                    <NewsContent newsid={route.newsid} navigator={navigator}/>
                 </View>
             );
         }

@@ -32,21 +32,35 @@ function failureNewsPosts(message: string):Action{
         receivedAt: Date.now()
     }
 }
-
-export function fetchNewsPosts(pageindex:number, to: To = "init", pagesize:number = 10):ThunkAction{
+export function newsProofreadPosts(pageindex: number, topid: string = "", pagesize: number = 10):ThunkAction{
     return function(dispatch){
-        let index = pageindex;
-        if(to=="init"){
-            index = 1;
-            dispatch(requestNewsPosts(false, true));
-        }else if(to=="more"){
-            index = pageindex + 1;
+        dispatch(requestNewsPosts(false, topid=="" ? true : false));
+        return callApi(`/news/recent/paged/${pageindex}/${pagesize}`)
+        .then(text=>{
+            parser.parseString(text, (err, result)=>{
+                let json = Schema.process(result.entry, Schema.NEWS_ARRAY);
+                let posts = json.entities.news;
+                dispatch(receiveNewsPosts(posts, pageindex));
+                
+                //app不是第一次加载，但是本地保存的recent.items和服务器的连接不起来，因此要校对
+                if(topid!="" && posts[topid]==undefined && pageindex * pagesize < 30){
+                    
+                    dispatch(newsProofreadPosts(pageindex + 1, topid));
+                }
+            })
+        })
+    }
+}
+export function fetchNewsPosts(pageindex:number, to: To, pagesize:number = 10):ThunkAction{
+    return function(dispatch){
+        let index;
+        if(to=="more"){
+            index = pageindex + 1;//触发加载更多
             dispatch(requestNewsPosts(false, false));
         }else{
-            index = 1;
+            index = 1;//触发下拉更新
             dispatch(requestNewsPosts(true, false));
         }
-        console.log(`pageindex${index}`);
         return callApi(`/news/recent/paged/${index}/${pagesize}`)
         .then(text=>{
             parser.parseString(text, function (err, result) {

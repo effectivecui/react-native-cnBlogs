@@ -7,7 +7,8 @@ import {
   View,
   ListView,
   RefreshControl,
-  Dimensions
+  Dimensions,
+  TouchableNativeFeedback
 } from 'react-native';
 import { connect } from 'react-redux';
 import {fetchNewsPosts, fetchNewsContent} from '../actions/news';
@@ -27,7 +28,6 @@ type Props = {
     lastUpdated: number,
     items: Array<News>,
     pageindex: number,
-    onDidMount: ()=>void,
     loadRowContent: (id: number)=>void,
     fresh: ()=>void,
     more: (pageindex: number)=>void,
@@ -41,9 +41,7 @@ class List extends React.Component {
     (this: any).renderHeader = this.renderHeader.bind(this);
     (this: any).renderFooter = this.renderFooter.bind(this);
   }
-  componentDidMount(){
-      this.props.onDidMount();
-  }
+
   renderHeader(){
       return (
         <View style={styles.header}>
@@ -53,14 +51,23 @@ class List extends React.Component {
   }
   renderFooter(){
       return (
-        <View style={styles.footer}>
-          <Text style={styles.footertext} onPress={()=>{
-            this.props.more(this.props.pageindex-1)
-          }}>加载中...</Text>
-        </View>
+         <TouchableNativeFeedback
+            background={TouchableNativeFeedback.SelectableBackground()}
+            onPress={()=>this.props.more(this.props.pageindex-1)}>
+            <View style={styles.footer}>
+              <Text style={styles.footertext} >加载中...</Text>
+            </View>
+          </TouchableNativeFeedback>
       );
   }
   render() {
+    /*console.log("rendering");
+    console.log(this.props.didInvalidate);
+    let temp = [];
+    this.props.items.forEach((value)=>{
+      temp.push(value.id);
+    })
+    console.log(temp);*/
     if(this.props.didInvalidate)return <Text>Loading</Text>
     return (
       <ListView
@@ -117,9 +124,6 @@ function mapStateToProps(state: State, props: Props){
 
 function mapDispatchToProps(dispatch: Dispatch, props: Props){
   return {
-    onDidMount: ()=>{
-      dispatch(fetchNewsPosts(1));
-    },
     loadRowContent: (id: number)=>{
       dispatch(fetchNewsContent(id));
     },

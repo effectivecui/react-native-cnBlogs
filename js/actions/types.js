@@ -1,7 +1,7 @@
 //@flow
 import {NEWS_FETCH_POSTS_FAILURE,NEWS_FETCH_POSTS_SUCCESS,NEWS_FETCH_POSTS_REQUEST} from './news';
 export type ParseObject = Object;
-export type To = | "more" | "fresh" | "init";
+export type To = | "more" | "fresh";
 
 export type Action = 
 | {type: string, requestedAt: number}

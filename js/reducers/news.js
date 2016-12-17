@@ -88,6 +88,6 @@ const entities = combineReducers({
 });
 
 export const news = combineReducers({
-    recent,
-    entities
+    entities,
+    recent
 });

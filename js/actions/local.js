@@ -1,4 +1,5 @@
 import {AsyncStorage} from 'react-native';
+import {newsProofreadPosts} from './news';
 export const CN_BLOGS_STATE = "CN_BLOGS_STATE";
 export const LOCAL_REQUEST = "LOCAL_REQUEST";
 function requestLocal(){
@@ -26,10 +27,11 @@ export function getLocal(key: string){
         return AsyncStorage.getItem(key: string, (err, result)=>{
             if(result!=undefined){
                 result = JSON.parse(result);
-                //console.log("loading local state")
-                //console.log(result);
                 dispatch(receiveLocal(result));
             }
+            let topid = result&&result.news&&result.news.recent&&result.news.recent.items[0] ?
+            result.news.recent.items[0] : ""; //判断是否是初次启动app
+            dispatch(newsProofreadPosts(1, topid));
         })
     }
 }
