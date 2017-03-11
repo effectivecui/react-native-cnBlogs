@@ -5,7 +5,7 @@
 
 博客园民间安卓手机客户端：http://avenwu.net/cnblogs/
 
-
+封面借用了One 一个的每日一图，链接：https://blog.mayuko.cn/api/one-api/img.php
 #博客园官方提供的接口地址：
 博客：http://wcf.open.cnblogs.com/blog/help
 
