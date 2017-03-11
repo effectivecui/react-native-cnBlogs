@@ -12,6 +12,7 @@ import {
 import {connect} from 'react-redux';
 import {List} from './containers/List';
 import {NewsContent} from './containers/NewsContent'
+import {Cover} from './containers/Cover';
 import {setLocal, getLocal, CN_BLOGS_STATE} from './actions/local';
 
 class Navigation extends Component{
@@ -68,16 +69,25 @@ class Navigation extends Component{
                 </View>
             );
         }
+        if(route.loaded){
+            return (
+                <View style={{flex: 1}}>
+                    <StatusBar
+                        translucent={true}
+                        hidden={true}
+                        animated={true}      
+                    />
+                    <List style={{flex: 1}} navigator={navigator}/>  
+                </View>
+            );
+        }
         return (
             <View style={{flex: 1}}>
-                <StatusBar
-                    translucent={true}
-                    hidden={true}
-                    animated={true}      
-                />
-                <List style={{flex: 1}} navigator={navigator}/>  
+                <StatusBar hidden={true} />
+                <Cover navigator={navigator} />
             </View>
-        );
+        )
+        
     }
 }
 function mapStateToProps(state){

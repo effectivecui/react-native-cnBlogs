@@ -8,7 +8,8 @@ import {
   ListView,
   RefreshControl,
   Dimensions,
-  TouchableNativeFeedback
+  TouchableNativeFeedback,
+  ActivityIndicator
 } from 'react-native';
 import { connect } from 'react-redux';
 import {fetchNewsPosts, fetchNewsContent} from '../actions/news';
@@ -68,7 +69,14 @@ class List extends React.Component {
       temp.push(value.id);
     })
     console.log(temp);*/
-    if(this.props.didInvalidate)return <Text>Loading</Text>
+    if(this.props.didInvalidate)
+      return (      
+        <ActivityIndicator
+          animating={true}   
+          style={[{alignItems: 'center', justifyContent: 'center', padding: 8, height: 80}]}
+          size="large"
+        />
+      );
     return (
       <ListView
        enableEmptySections={true}

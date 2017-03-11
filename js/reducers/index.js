@@ -4,5 +4,5 @@ import {news} from './news';
 
 module.exports.reducers = combineReducers({
   news,
-  blogs
+  blogs,
 });
