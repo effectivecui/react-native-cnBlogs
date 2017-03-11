@@ -34,7 +34,9 @@
 ----------------------
 ##store结构
 `
+
 {
+    
   news: {
     entities:{
         posts:{
