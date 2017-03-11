@@ -1,37 +1,18 @@
 //@flow
 
 import type {Action,ParseObject, ThunkAction, To} from './types';
+import {makeActionCreator, getId} from './types';
 import {callApi, parser, Schema} from '../api'
 import {width} from '../api/windows';
-export const NEWS_FETCH_POSTS_REQUEST = "NEWS_FETCH_POSTS_REQUEST";
-function requestNewsPosts(isFetching: boolean, didInvalidate: boolean): Action{
-    return {
-        type: NEWS_FETCH_POSTS_REQUEST,
-        isFetching,
-        didInvalidate,
-        requestedAt: Date.now(),
-    }
-}
+export const NEWS_FETCH_POSTS_REQUEST = getId();
+const requestNewsPosts = makeActionCreator(NEWS_FETCH_POSTS_REQUEST, "isFetching", "didInvalidate", "requestedAt");
 
-export const NEWS_FETCH_POSTS_SUCCESS = "NEWS_FETCH_POSTS_SUCCESS";
-function receiveNewsPosts(posts: ParseObject,  pageindex): Action{
-    return {
-        type: NEWS_FETCH_POSTS_SUCCESS,
-        posts,
-        pageindex,
-        receivedAt: Date.now()
-    }
-}
+export const NEWS_FETCH_POSTS_SUCCESS = getId();
+const receiveNewsPosts = makeActionCreator(NEWS_FETCH_POSTS_SUCCESS, "posts", "pageindex", "receivedAt");
 
+export const NEWS_FETCH_POSTS_FAILURE = getId();
+const failureNewsPosts = makeActionCreator(NEWS_FETCH_POSTS_FAILURE, "message", "receivedAt");
 
-export const NEWS_FETCH_POSTS_FAILURE = "NEWS_FETCH_POSTS_FAILURE";
-function failureNewsPosts(message: string):Action{
-    return {
-        type: NEWS_FETCH_POSTS_FAILURE,
-        message,
-        receivedAt: Date.now()
-    }
-}
 export function newsProofreadPosts(pageindex: number, topid: string = "", pagesize: number = 10):ThunkAction{
     return function(dispatch){
         dispatch(requestNewsPosts(false, topid=="" ? true : false));
@@ -74,34 +55,19 @@ export function fetchNewsPosts(pageindex:number, to: To, pagesize:number = 10):T
     }
 }
 
-export const NEWS_FETCH_CONTENT_REQUEST = "NEWS_FETCH_CONTENT_REQUEST";
-export const NEWS_FETCH_COMMENTS_REQUEST = "NEWS_FETCH_COMMENTS_REQUEST";
-function requestNewsCo(type: string):Action{
-    return {
-        type,
-        requestedAt: Date.now()
-    }
-}
+export const NEWS_FETCH_CONTENT_REQUEST = getId();
+export const NEWS_FETCH_COMMENTS_REQUEST = getId();
+const requestNewsContent = makeActionCreator(NEWS_FETCH_CONTENT_REQUEST, "requestedAt");
+const requestNewsComment = makeActionCreator(NEWS_FETCH_COMMENTS_REQUEST, "requestedAt");
+export const NEWS_FETCH_COMMENTS_SUCCESS = getId();
+export const NEWS_FETCH_CONTENT_SUCCESS = getId();
+const receiveNewsContent = makeActionCreator(NEWS_FETCH_CONTENT_SUCCESS, "posts", "receivedAt");
+const receiveNewsComment = makeActionCreator(NEWS_FETCH_COMMENTS_SUCCESS, "posts", "receivedAt");
+export const NEWS_FETCH_COMMENTS_FAILURE = getId();
+export const NEWS_FETCH_CONTENT_FAILURE = getId();
+const failureNewsContent = makeActionCreator(NEWS_FETCH_CONTENT_FAILURE, "message", "receivedAt");
+const failureNewsComment = makeActionCreator(NEWS_FETCH_COMMENTS_FAILURE, "message", "receivedAt");
 
-export const NEWS_FETCH_COMMENTS_SUCCESS = "NEWS_FETCH_COMMENTS_SUCCESS";
-export const NEWS_FETCH_CONTENT_SUCCESS = "NEWS_FETCH_CONTENT_SUCCESS";
-function receiveNewsCo(type: string, posts: ParseObject): Action{
-    return {
-        type,
-        posts,
-        receivedAt: Date.now()
-    }
-}
-
-export const NEWS_FETCH_COMMENTS_FAILURE = "NEWS_FETCH_COMMENTS_FAILURE";
-export const NEWS_FETCH_CONTENT_FAILURE = "NEWS_FETCH_CONTENT_FAILURE";
-function failureNewsCo(type: string, message: string): Action{
-    return {
-        type,
-        message,
-        receivedAt: Date.now()
-    }
-}
 export function fetchNewsContent(id: number): ThunkAction{
     return function(dispatch){
         //dispatch(requestNewsCo(NEWS_FETCH_CONTENT_REQUEST));
@@ -109,16 +75,16 @@ export function fetchNewsContent(id: number): ThunkAction{
         .then(text=>{
             parser.parseString(text, (err, result)=>{
                 //console.log(result.Content);
-                dispatch(receiveNewsCo(NEWS_FETCH_CONTENT_SUCCESS, {
+                dispatch(receiveNewsContent({
                     //处理图片显示比例的问题，只设置width而不设置height可以等比缩放
                     //处理img标签中src地址不正确的问题
                     content: result.Content.replace(/src=\"\/\//g, `width="${width-30}" height="" src="http://`),
                     id
-                }))
+                }));
             })
         })
         .catch(err=>{
-            dispatch(failureNewsCo(NEWS_FETCH_CONTENT_FAILURE, err.message))
+            dispatch(failureNewsContent(err.message));
         })
     }
 }

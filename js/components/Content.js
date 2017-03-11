@@ -21,6 +21,7 @@ const js = ``;
 export default class Content extends Component{
     
     props: Props
+    
     _panResponder: any
 
     componentWillMount(){
@@ -49,7 +50,10 @@ export default class Content extends Component{
             // The user has released all touches while this view is the
             // responder. This typically means a gesture has succeeded
             //console.log(gestureState.vx);
-            if(gestureState.vx < -0.25){
+            let vx = gestureState.vx < 0 ? -gestureState.vx : gestureState.vx;
+            let vy = gestureState.vy < 0 ? -gestureState.vy : gestureState.vy;
+
+            if(vx > 0.3 && vy < 0.1){
                 this.props.navigator.pop();
             }
         },

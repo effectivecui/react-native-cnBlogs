@@ -14,3 +14,22 @@ export type getState = () => Object;
 export type State = Object;
 export type ThunkAction = (dispatch: Dispatch, getState: getState) => any;
 export type PromiseAction = Promise<Action>;
+
+export const makeActionCreator = (type, ...argNames) => {
+  return function(...args) {
+    let action = { type }
+    argNames.forEach((arg, index) => {
+        if(argNames[index] == "requestedAt" || argNames[index] == "receivedAt")
+            action[argNames[index]] = Date.now();
+        else
+            action[argNames[index]] = args[index]
+    })
+    
+    return action
+  }
+}
+
+let type_id = 0;
+export const getId = () => {
+    return type_id++;
+}
