@@ -1,5 +1,5 @@
 # android-react-native-cnblogs
-博客园安卓react-native，没有苹果电脑手机没办法只能做安卓端
+博客园安卓react-native，没有苹果电脑手机没办法只能做安卓端,[下载](https://github.com/effectivecui/react-native-cnBlogs/blob/master/apk/app-release.apk)
 
 博客园官方苹果手机客户端：http://app.cnblogs.com/
 
