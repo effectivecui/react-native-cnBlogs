@@ -34,10 +34,10 @@
 ----------------------
 ##store结构
 `
-
 {
-    
+
   news: {
+  
     entities:{
         posts:{
             1: {
@@ -98,6 +98,7 @@
         items: [],
     },
   },
+  
   bloggers:{
   
      entities:{
