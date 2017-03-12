@@ -14,7 +14,7 @@ import {List} from './containers/List';
 import {NewsContent} from './containers/NewsContent'
 import {Cover} from './containers/Cover';
 import {setLocal, getLocal, CN_BLOGS_STATE} from './actions/local';
-import {getCover} from './actions/cover';
+
 class Navigation extends Component{
   
     constructor(props) {
@@ -26,7 +26,6 @@ class Navigation extends Component{
     componentDidMount() {
         if(Platform.OS === 'android') {
             this.props.dispatch(getLocal(CN_BLOGS_STATE));
-            this.props.dispatch(getCover());
             BackAndroid.addEventListener('hardwareBackPress', this.handleBackPressed);
         }
     }
